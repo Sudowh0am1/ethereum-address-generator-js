@@ -1,8 +1,52 @@
-// Add imports here
+
+const BIP39 = require("bip39")
+const hdkey = require('ethereumjs-wallet/hdkey')
+const Wallet = require('ethereumjs-wallet')
+const keccak256 = require('js-sha3').keccak256;
+const EthereumTx = require('ethereumjs-tx')
 
 
+// Generate a random mnemonic (uses crypto.randomBytes under the hood), defaults to 128-bits of entropy
+function generateMnemonic(){
+    return BIP39.generateMnemonic()
+}
 
-// Add functions here
+var isValid = BIP39.validateMnemonic("Enter your mnemonic here")
+// This will return false
+
+function generateSeed(mnemonic){
+    return BIP39.mnemonicToSeed(mnemonic)
+}
+
+// ------------------------- Generate a Public / Private Keypair --------------------
+function generatePrivKey(mnemonic){
+    const seed = generateSeed(mnemonic)
+    return hdkey.fromMasterSeed(seed).derivePath(`m/44'/60'/0'/0/0`).getWallet().getPrivateKey()
+}
+
+function derivePubKey(privKey){
+    const wallet = Wallet.fromPrivateKey(privKey)    
+    return wallet.getPublicKey()
+}
+
+// -------------------------------- Derive the Address -------------------------------
+function deriveEthAddress(pubKey){
+    const address = keccak256(pubKey) // keccak256 hash of  publicKey
+    // Get the last 20 bytes of the public key
+    return "0x" + address.substring(address.length - 40, address.length)    
+}
+
+// --------------------------------- Using the Key -----------------------------------
+function signTx(privKey, txData){
+    const tx = new EthereumTx(txData)
+    tx.sign(privKey)
+    return tx
+}
+
+// recover the sender address from the signed transaction
+function getSignerAddress(signedTx){
+    return "0x" + signedTx.getSenderAddress().toString('hex')
+}
 
 
 
