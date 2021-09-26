@@ -48,14 +48,6 @@ function getSignerAddress(signedTx){
     return "0x" + signedTx.getSenderAddress().toString('hex')
 }
 
-
-
-/*
-
-Do not edit code below this line.
-
-*/
-
 var mnemonicVue = new Vue({
     el:"#app",
     data: {  
